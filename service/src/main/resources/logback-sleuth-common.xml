@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<included>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty name="APPLICATION_NAME" source="spring.application.name" defaultValue="UNKNOWN"/>
+    <property name="log_dir" value="logs"/>
+    <property name="max_history" value="90"/>
+    <property name="max_file_size" value="1GB"/>
+    <property name="total_size" value="100GB"/>
+    <property name="console_pattern"
+              value="%clr(%d{yyyy-MM-dd HH:mm:ss.SSS}){faint} %clr(%5level) %clr([${APPLICATION_NAME} ${PID} %t]){magenta} %clr([%X{traceId},%X{spanId}]){blue} %clr(%logger{50}.%method&lt;%line&gt;){cyan} %clr(%msg%n){faint}"/>
+    <property name="pattern"
+              value="%d{yyyy-MM-dd HH:mm:ss.SSS} %5level [${APPLICATION_NAME} ${PID} %t] [%X{traceId},%X{spanId}] %logger{36}.%method&lt;%line&gt; %msg%n"/>
+
+    <!-- console -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <Pattern>${console_pattern}</Pattern>
+        </encoder>
+    </appender>
+    <appender name="async_console" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="console"/>
+    </appender>
+
+    <!-- info -->
+    <appender name="info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_dir}/info.log</file>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log_dir}/info-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most 100MB, keep 60 days worth of history, but at most total_size -->
+            <maxHistory>${max_history}</maxHistory>
+            <maxFileSize>${max_file_size}</maxFileSize>
+            <totalSizeCap>${total_size}</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    <appender name="async_info" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="info"/>
+    </appender>
+
+    <!-- error -->
+    <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log_dir}/error.log</file>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+        <encoder>
+            <pattern>${pattern}</pattern>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log_dir}/error-%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <!-- each file should be at most max_file_size, keep 60 days worth of max_history, but at most total_size -->
+            <maxHistory>${max_history}</maxHistory>
+            <maxFileSize>${max_file_size}</maxFileSize>
+            <totalSizeCap>${total_size}</totalSizeCap>
+        </rollingPolicy>
+    </appender>
+    <appender name="async_error" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <includeCallerData>true</includeCallerData>
+        <appender-ref ref="error"/>
+    </appender>
+
+</included>

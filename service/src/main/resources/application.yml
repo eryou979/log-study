@@ -1,0 +1,15 @@
+server:
+  port: 8001
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: service
+  profiles:
+    active: '@profileActive@'
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
